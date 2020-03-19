@@ -46,10 +46,16 @@ Sooner or later I will complete it with the relative answers. Feel free to contr
 
 
 
-### [[↑]](#toc) <a name='patterns'>Questions about Design Patterns:</a>
+### [[↑]](#toc) <a name='patterns'>Questions about Design Patterns:</a> [ans](#dp-ans)
 
-* Why are global and static objects evil? Can you show it with a code example?
-* Tell me about Inversion of Control and how it improves the design of code.
+* Why are global and static objects evil? Can you show it with a code example? [ans](#dp1)
+* Tell me about Inversion of Control and how it improves the design of code. [ans](#dp1)
+* What is dependency injection and it's advantages. [ans](#dp1)
+* dependency injection vs Inversion of Control. [ans](#dp1)
+* What is coupling?  [ans](#dp1)
+* What is Cohesion?  [ans](#dp1)
+* what is single resposiblity principle? 
+* What is SOLID principles? 
 * The Law of Demeter (the Principle of Least Knowledge) states that each unit should have only limited knowledge about other units and it should only talk to its immediate friends (sometimes stated as "don't talk to strangers"). Would you write code violating this principle, show why it is a bad design and then fix it?
 * Active-Record is the design pattern that promotes objects to include functions such as Insert, Update, and Delete, and properties that correspond to the columns in some underlying database table. In your opinion and experience, which are the limits and pitfalls of the this pattern?
 * Data-Mapper is a design pattern that promotes the use of a layer of Mappers that moves data between objects and a database while keeping them independent of each other and the mapper itself. On the contrary, in Active-Record objects directly incorporate operations for persisting themselves to a database, and properties corresponding to the underlying database tables. Do you have an opinion on those patterns? When would you use one instead of the other?
@@ -63,6 +69,178 @@ Sooner or later I will complete it with the relative answers. Feel free to contr
 * Is goto evil? You may have heard of the famous paper "Go To Statement Considered Harmful" by Edsger Dijkstra, in which he criticized the use of the `goto` statement and advocated structured programming instead. The use of `goto` has always been controversial, so much that even Dijkstra's letter was criticized with articles such as "'GOTO Considered Harmful' Considered Harmful". What's your opinion on the use of `goto`?
 * The robustness principle is a general design guideline for software that recommends "*be conservative in what you send, be liberal in what you accept*". It is often reworded as "*be a tolerant reader and a careful writer*". Would you like to discuss the rationale of this principle?
 * Separation of Concerns is a design principle for separating a computer program into distinct areas, each one addressing a separate concern. There are a lot of different mechanisms for achieving Separation of Concerns (use of objects, functions, modules, or patterns such as MVC and the like). Would you discuss this topic?
+
+
+
+
+### [[↑]](#toc) <a name='dp-ans'>ANS about Design Patterns:</a>
+* #### <a name='dp1'>Why are global and static objects evil? Can you show it with a code example?</a>
+  * using Var in js code base fucked up things
+  * using Var in js for loop code fucked up things
+    ```
+      var callbacks = [];
+        for (var i = 0; i < 5; i++) {
+          callbacks.push( function() { return i; } );
+        }
+      console.log(callbacks.map( function(cb) { return cb(); } ));
+  ```
+* #### <a name='dp1'>Tell me about Inversion of Control and how it improves the design of code</a>
+  * Inversion of Control (also known as the Hollywood Principle - "Don't call us, we'll call you").
+
+  * This is a classic diffrence between Library and Framework.
+    
+    In Library our code had freedom to call any function of library whenever we want
+    
+    But in framework we give all our function/action to framework instead of importing their function. Now that framework has all our funcctions, they call call it as they desire.
+    ```
+      // Library; here we have control
+      import {x,y,z} from 'Lib'
+
+      fetch('xxx').then((data)=>x('data'))
+      _y = y('sjjs')
+      _y = somelocalfunction()
+      z(_y)
+    ```
+
+    ```
+      // Framework; here we give functions to framwork
+      import {x,y,z} from 'Lib'
+
+      result = x(somelocalfunction, someotherfunction)
+    ```
+  * Callback function in javascript
+    In fetch we pass a callback function, fetch completes the task and call that function on it's terms.
+    fetch has the freedom of calling the function.
+  * https://martinfowler.com/bliki/InversionOfControl.html
+  * One important characteristic of a framework is that the methods defined by the user to tailor the framework will often be called from within the framework
+    itself, rather than from the user's application code. The framework often plays the role of the main program in coordinating and sequencing application activity.
+    This inversion of control gives frameworks the power to serve as extensible skeletons. The methods supplied by the user tailor the generic algorithms defined in
+    the framework for a particular application.
+
+    -- Ralph Johnson and Brian Foote
+  * https://www.martinfowler.com/articles/injection.html
+  * https://stackoverflow.com/questions/3058/what-is-inversion-of-control
+
+* #### <a name='dp1'>What is dependency injection and it's advantages.</a>
+  * It's just passing a object to another object INSTEAD OF initializing a object inside another object
+  * https://www.jamesshore.com/Blog/Dependency-Injection-Demystified.html
+  * https://www.martinfowler.com/articles/injection.html
+
+* #### <a name='dp1'>dependency injection vs Inversion of Control.</a>
+  * https://stackoverflow.com/questions/6550700/inversion-of-control-vs-dependency-injection
+  * IOC without DI can be through inheritence (review)
+
+* #### <a name='dp1'>What is coupling?</a>
+  * coupling, it refers to how related or dependent two classes/modules are toward each other. For low coupled classes, changing something major in one class should not affect the other. High coupling would make it difficult to change and maintain your code; since classes are closely knit together, making a change could require an entire system revamp.
+  Good software design has high cohesion and low coupling.
+  (https://stackoverflow.com/questions/3085285/difference-between-cohesion-and-coupling)
+  * A tightly ccoupled class/object can be converted to loosely coupled by implementing functions inside a dependee that gives the desired output. here this function will hide all the compplexity of object, dependents just need to call that function to get output.
+  Advantage of above - if something changes in dependee class, only changing that function of dependee will do the work, we don't need to change anything in dependent as long as dependent is getting data in same format from that dependee function
+  **The same can be achieved through inferface**
+    ```
+    // Tightly Coupled
+      public class CartEntry
+    {
+        public float Price;
+        public int Quantity;
+    }
+
+    public class CartContents
+    {
+        public CartEntry[] items;
+    }
+
+    public class Order
+    {
+        private CartContents cart;
+        private float salesTax;
+
+        public Order(CartContents cart, float salesTax)
+        {
+            this.cart = cart;
+            this.salesTax = salesTax;
+        }
+
+        public float OrderTotal()
+        {
+            float cartTotal = 0;
+            for (int i = 0; i < cart.items.Length; i++)
+            {
+                cartTotal += cart.items[i].Price * cart.items[i].Quantity;
+            }
+            cartTotal += cartTotal*salesTax;
+            return cartTotal;
+        }
+    }
+    ```
+
+    ```
+    // Loosely coupled
+    public class CartEntry
+    {
+        public float Price;
+        public int Quantity;
+
+        public float GetLineItemTotal()
+        {
+            return Price * Quantity;
+        }
+    }
+
+    public class CartContents
+    {
+        public CartEntry[] items;
+
+        public float GetCartItemsTotal()
+        {
+            float cartTotal = 0;
+            foreach (CartEntry item in items)
+            {
+                cartTotal += item.GetLineItemTotal();
+            }
+            return cartTotal;
+        }
+    }
+
+    public class Order
+    {
+        private CartContents cart;
+        private float salesTax;
+
+        public Order(CartContents cart, float salesTax)
+        {
+            this.cart = cart;
+            this.salesTax = salesTax;
+        }
+
+        public float OrderTotal()
+        {
+            return cart.GetCartItemsTotal() * (1.0f + salesTax);
+        }
+    }
+    ```
+  * https://stackoverflow.com/questions/226977/what-is-loose-coupling-please-provide-examples
+  * Coupling is the indication of the relationships between modules. (https://stackoverflow.com/questions/3085285/difference-between-cohesion-and-coupling)
+
+
+* #### <a name='dp1'>What is cohesion?</a>
+  * Cohesion refers to what the class (or module) can do. Low cohesion would mean that the class does a great variety of actions - it is broad, unfocused on what it should do. High cohesion means that the class is focused on what it should be doing, i.e. only methods relating to the intention of the class.
+  * If a module has a high cohesion, break it into small modules with low cohesion.
+  * Cohesion is the indication of the relationship within a module. (https://stackoverflow.com/questions/3085285/difference-between-cohesion-and-coupling)
+
+* #### <a name='dp1'>what is single resposiblity principle??</a>
+  * https://wwww.youtube.com/watch?v=Gt0M_OHKhQE
+  * https://softwareengineering.stackexchange.com/questions/150760/single-responsibility-principle-how-can-i-avoid-code-fragmentation
+  * https://hackernoon.com/you-dont-understand-the-single-responsibility-principle-abfdd005b137
+  * >Gather together the things that change for the same reasons. Separate those things that change for different reasons.
+    or
+    >one reason to change
+  * >Any change required of a code system will naturally need changes to the body of the code at a number of different points. If the system is structured following the principle of ‘gather together those things that change for the same reasons’, you will minimise the number of modules (classes) that need to change. This allows you to hide the change as much as possible behind encapsulation boundaries, thus stopping the change cascading out into the rest of the system, and reducing what needs retesting because it might be broken. (https://hackernoon.com/you-dont-understand-the-single-responsibility-principle-abfdd005b137)
+
+    **First try to club things together that can change together (or unclub that change on diffrent terms) after that try to implement function/interface for loose coupling**
+
+  * https://blog.cleancoder.com/uncle-bob/2014/05/08/SingleReponsibilityPrinciple.html
+
 
 
 ### [[↑]](#toc) <a name='design'>Questions about Code Design:</a>
@@ -471,3 +649,5 @@ This section collects some weird questions along the lines of the [Manhole Cover
 * I want to refactor a legacy system. You want to rewrite it from scratch. Argument. Then, switch our roles.
 * Your boss asks you to lie to the company. What's your reaction?
 * If you could travel back in time, which advice would you give to your younger self?
+
+
